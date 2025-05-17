@@ -1,6 +1,6 @@
 import random
 import numpy as np
-from typing import Dict
+from typing import Dict, List
 
 # Action Still = 1
 # Action Down = 2
@@ -50,6 +50,9 @@ class GameState:
         if ball_y_n > 1.0:
             ball_y_n = 1.0
             self.ball_vy = -self.ball_vy
+
+        self.ball_x = ball_x_n
+        self.ball_y = ball_y_n
 
     def get_context(self) -> List:
         return np.array([self.ball_xg,self.ball_y,self.ball_vx,self.ball_vy,self.paddle_y])
