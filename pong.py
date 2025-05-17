@@ -59,6 +59,7 @@ def run():
                 break
         game.update(1) # Do Nothing
         game_gui.update(game)
+        print(game.get_context())
         if game.over:
             pass
             #running = False

@@ -39,11 +39,13 @@ class GameState:
         if ball_x_n > 1.0:
             if ball_y_n <= self.paddle_y and ball_y_n >= self.paddle_y+self.paddle_h:
                 ball_x_n = 1.0
-                self.ball_vx = random.uniform(-0.03,0.03)
+                self.ball_vx = random.uniform(-0.03,0.0)
                 self.ball_vy = random.uniform(-0.015,0.015)
                 self.score += 1
             else:
                 self.over = True
+                ball_x_n = 1.0
+                self.ball_vx = -self.ball_vx
         if ball_y_n < 0.0:
             ball_y_n = 0.0
             self.ball_vy = -self.ball_vy
@@ -55,4 +57,4 @@ class GameState:
         self.ball_y = ball_y_n
 
     def get_context(self) -> List:
-        return np.array([self.ball_xg,self.ball_y,self.ball_vx,self.ball_vy,self.paddle_y])
+        return np.array([self.ball_x,self.ball_y,self.ball_vx,self.ball_vy,self.paddle_y])
