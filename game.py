@@ -9,7 +9,7 @@ class GameState:
     def __init__(self):
         self.ball_x = random.uniform(0.2, 0.8)
         self.ball_y = random.uniform(0.2, 0.8)
-        self.ball_vx = random.uniform(-0.03, 0.03)
+        self.ball_vx = random.uniform(-0.015, 0.015)
         self.ball_vy = random.uniform(-0.015, 0.015)
         self.paddle_y = 0.0
         self.paddle_h = 0.2
@@ -40,9 +40,10 @@ class GameState:
             ball_x_n = 0.0
             self.ball_vx = -self.ball_vx
         if ball_x_n > 1.0:
-            if ball_y_n <= self.paddle_y and ball_y_n >= self.paddle_y + self.paddle_h:
+            if ball_y_n >= self.paddle_y and ball_y_n <= (self.paddle_y +
+                                                          self.paddle_h):
                 ball_x_n = 1.0
-                self.ball_vx = random.uniform(-0.03, 0.0)
+                self.ball_vx = random.uniform(-0.015, 0.0)
                 self.ball_vy = random.uniform(-0.015, 0.015)
                 self.score += 1
             else:
