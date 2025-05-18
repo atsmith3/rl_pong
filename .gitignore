@@ -1,4 +1,6 @@
+*.pth
 __pycache__/*
 .*.swp
 .*.swo
 .venv/
+*.log
