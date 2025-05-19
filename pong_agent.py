@@ -31,11 +31,10 @@ class ExpertPolicyDataset(Dataset):
 class SLPongAgent:
 
     def __init__(self, layers: int = 1, dimensions: int = 512):
-        if torch.accelerator.is_available(
-        ) and torch.accelerator.current_accelerator():
-            self.device = torch.accelerator.current_accelerator().type
-        else:
-            self.device = "cpu"
+        self.device: str = "cpu"
+        accelerator = torch.accelerator.current_accelerator()
+        if torch.accelerator.is_available() and accelerator is not None:
+            self.device = str(accelerator.type)
         self.model = NeuralNetwork(layers, dimensions).to(self.device)
         self.loss_fn = nn.CrossEntropyLoss()
         #print(self.model)
