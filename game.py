@@ -7,11 +7,26 @@ from typing import Dict, List, Any
 class GameState:
 
     def __init__(self):
-        self.ball_x = random.uniform(0.2, 0.8)
-        self.ball_y = random.uniform(0.2, 0.8)
-        self.ball_vx = random.uniform(-0.015, 0.015)
-        self.ball_vy = random.uniform(-0.015, 0.015)
-        self.paddle_y = 0.0
+        self.ball_x = random.uniform(0.4, 0.6)
+        self.ball_y = random.uniform(0.4, 0.6)
+        self.ball_vx = random.choice([-1.0, 1.0]) * random.uniform(
+            0.001, 0.015)
+        self.ball_vy = random.choice([-1.0, 1.0]) * random.uniform(
+            0.001, 0.015)
+        self.paddle_y = 0.4
+        self.paddle_h = 0.2
+        self.paddle_vy = 0.04
+        self.score = 0
+        self.over = False
+
+    def reset(self):
+        self.ball_x = random.uniform(0.4, 0.6)
+        self.ball_y = random.uniform(0.4, 0.6)
+        self.ball_vx = random.choice([-1.0, 1.0]) * random.uniform(
+            0.001, 0.015)
+        self.ball_vy = random.choice([-1.0, 1.0]) * random.uniform(
+            0.001, 0.015)
+        self.paddle_y = 0.4
         self.paddle_h = 0.2
         self.paddle_vy = 0.04
         self.score = 0
@@ -43,8 +58,9 @@ class GameState:
             if ball_y_n >= self.paddle_y and ball_y_n <= (self.paddle_y +
                                                           self.paddle_h):
                 ball_x_n = 1.0
-                self.ball_vx = random.uniform(-0.015, 0.0)
-                self.ball_vy = random.uniform(-0.015, 0.015)
+                self.ball_vx = random.uniform(-0.015, -0.001)
+                self.ball_vy = random.choice([-1.0, 1.0]) * random.uniform(
+                    0.001, 0.015)
                 self.score += 1
             else:
                 self.over = True

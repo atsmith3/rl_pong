@@ -3,6 +3,9 @@ import sdl2
 import sdl2.ext
 import random
 import time
+import argparse
+import statistics
+from typing import List
 from game import GameState
 from pong_agent import SLPongAgent
 
@@ -66,36 +69,90 @@ class GameGUI:
         return ret
 
 
-def run(gui: bool = False):
-    running = True
+def run(args):
+    label = f"{args.batch_size}_{args.epochs}_{args.learning_rate}_{args.layers}_{args.dimension}"
+    print(f"Beginning Training for {label}")
 
+    agent = SLPongAgent(args.layers, args.dimension)
+    agent.train(args.batch_size, args.epochs, args.learning_rate)
+
+    running = True
     game = GameState()
-    if gui:
+    if args.gui:
         game_gui = GameGUI(game)
 
-    agent = SLPongAgent("pong_agent.pth")
     total_inference: int = 0
-    total_time_ns: int = 0
+    total_time_us: float = 0.0
 
-    while running:
-        start_time = time.time_ns()
-        action = agent.eval(game.get_context())
-        end_time = time.time_ns()
-        total_time_ns += end_time - start_time
-        total_inference += 1
-        #print(f"SLAgentAction: {action}")
-        game.update(action)
-        if gui:
-            if not game_gui.update(game):
+    scores: List[int] = []
+
+    for match in range(args.matches):
+        running = True
+        game.reset()
+        while running:
+            start_time = time.time_ns()
+            action = agent.eval(game.get_context())
+            end_time = time.time_ns()
+            total_time_us += (end_time - start_time) / 1000.0
+            total_inference += 1
+            game.update(action)
+            if args.gui:
+                if not game_gui.update(game):
+                    running = False
+            if game.over:
+                scores.append(game.score)
+                print(f"[{match:>4}]Score = {game.score}")
                 running = False
-        if game.over:
-            print(f"Score = {game.score}")
-            print(
-                f"Total Inferences: {total_inference}; {float(total_time_ns)/float(total_inference):.3f} ns/inf"
-            )
-            running = False
-            break
+
+    print(f"Average Score: {statistics.mean(scores)}")
+    print(
+        f"Total Inferences: {total_inference}; {float(total_time_us)/float(total_inference):.3f} us/inf"
+    )
 
 
 if __name__ == "__main__":
-    sys.exit(run(True))
+    parser = argparse.ArgumentParser(
+        description="Supervised Learning Pong Agent")
+    parser.add_argument("-g",
+                        "--gui",
+                        action="store_true",
+                        default=False,
+                        help="Enable GUI Mode (Runs slower), skips training")
+    parser.add_argument("-t",
+                        "--train",
+                        type=str,
+                        default="./expert_policy.txt",
+                        help="Enable training from expert policy dataset")
+    parser.add_argument("-b",
+                        "--batch_size",
+                        type=int,
+                        default=100,
+                        help="Batch Size if training enabled")
+    parser.add_argument("-e",
+                        "--epochs",
+                        type=int,
+                        default=500,
+                        help="Training Epochs if training enabled")
+    parser.add_argument("-lr",
+                        "--learning_rate",
+                        type=float,
+                        default=1e-1,
+                        help="Learning Rate if training enabled")
+    parser.add_argument("-l",
+                        "--layers",
+                        type=int,
+                        default=1,
+                        help="Hidden layers")
+    parser.add_argument("-d",
+                        "--dimension",
+                        type=int,
+                        default=512,
+                        help="Hidden layer dimension")
+    parser.add_argument("-m",
+                        "--matches",
+                        type=int,
+                        default=100,
+                        help="Number of random games for benchmarking")
+    args = parser.parse_args()
+
+    sys.exit(run(args))

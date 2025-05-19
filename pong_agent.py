@@ -2,6 +2,7 @@ import sys
 import numpy as np
 import numpy.typing as npt
 import torch
+from typing import List, Any
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 from torchvision import datasets
@@ -29,16 +30,18 @@ class ExpertPolicyDataset(Dataset):
 
 class SLPongAgent:
 
-    def __init__(self, restore=""):
-        self.device = torch.accelerator.current_accelerator(
-        ).type if torch.accelerator.is_available() else "cpu"
-        self.model = NeuralNetwork().to(self.device)
+    def __init__(self, layers: int = 1, dimensions: int = 512):
+        self.device: str = "cpu"
+        accelerator = torch.accelerator.current_accelerator()
+        if torch.accelerator.is_available() and accelerator is not None:
+            self.device = str(accelerator.type)
+        self.model = NeuralNetwork(layers, dimensions).to(self.device)
         self.loss_fn = nn.CrossEntropyLoss()
-        print(self.model)
-        if restore:
-            print(f"Restoring weights from {restore}")
-            self.model.load_state_dict(torch.load(restore))
-            self.model.eval()
+        #print(self.model)
+        #if restore:
+        #    print(f"Restoring weights from {restore}")
+        #    self.model.load_state_dict(torch.load(restore))
+        #    self.model.eval()
 
     def train(self, batch_size=100, epochs=500, lr=1e-1):
         train_dataloader = DataLoader(ExpertPolicyDataset(),
@@ -48,8 +51,9 @@ class SLPongAgent:
         optimizer = torch.optim.SGD(self.model.parameters(), lr=lr)
         for t in range(epochs):
             print(f"Epoch {t+1}\n-------------------------------")
-            train(train_dataloader, model, loss_fn, optimizer)
-        torch.save(model.state_dict(), "pong_agent.pth")
+            train(train_dataloader, self.model, self.loss_fn, optimizer,
+                  self.device)
+        #torch.save(model.state_dict(), "pong_agent.pth")
         print("Training completed")
 
     def eval(self, state) -> int:
@@ -64,13 +68,16 @@ class SLPongAgent:
 
 class NeuralNetwork(nn.Module):
 
-    def __init__(self):
+    def __init__(self, layers: int = 1, dimension: int = 512):
         super().__init__()
         self.flatten = nn.Flatten()
-        self.linear_relu_stack = nn.Sequential(nn.Linear(5, 512), nn.ReLU(),
-                                               nn.Linear(512, 512), nn.ReLU(),
-                                               nn.Linear(512, 512), nn.ReLU(),
-                                               nn.Linear(512, 3))
+        internal_layers: List[Any] = []
+        for i in range(layers):
+            internal_layers.append(nn.Linear(dimension, dimension))
+            internal_layers.append(nn.ReLU())
+        self.linear_relu_stack = nn.Sequential(nn.Linear(5, dimension),
+                                               nn.ReLU(), *internal_layers,
+                                               nn.Linear(dimension, 3))
 
     def forward(self, x):
         x = self.flatten(x)
@@ -78,7 +85,7 @@ class NeuralNetwork(nn.Module):
         return logits
 
 
-def train(dataloader, model, loss_fn, optimizer):
+def train(dataloader, model, loss_fn, optimizer, device):
     size = len(dataloader.dataset)
     model.train()
     for batch, (X, y) in enumerate(dataloader):
