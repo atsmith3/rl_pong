@@ -1,6 +1,4 @@
 import random
-import numpy as np
-import numpy.typing as npt
 from typing import Dict, List, Any
 
 
@@ -76,7 +74,7 @@ class GameState:
         self.ball_x = ball_x_n
         self.ball_y = ball_y_n
 
-    def get_context(self) -> npt.NDArray[np.float32]:
-        return np.array([
+    def get_context(self) -> List[float]:
+        return [
             self.ball_x, self.ball_y, self.ball_vx, self.ball_vy, self.paddle_y
-        ])
+        ]

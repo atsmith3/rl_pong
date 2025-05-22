@@ -7,7 +7,7 @@ import argparse
 import statistics
 from typing import List
 from game import GameState
-from pong_agent import SLPongAgent
+from agents.sl_agent import SLPongAgent
 
 WHITE = sdl2.ext.Color(255, 255, 255)
 RED = sdl2.ext.Color(255, 0, 0)
