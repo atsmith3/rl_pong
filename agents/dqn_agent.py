@@ -170,8 +170,9 @@ class DQNPongAgent:
         torch.nn.utils.clip_grad_value_(policy_net.parameters(), 100)
         self.optimizer.step()
 
-    def eval(self):
-        pass
+    def eval(self, state) -> int:
+        with torch.no_grad():
+            return self.policy(state).max(1).indeces.view(1, 1)
 
 
 class DQN(nn.Module):
