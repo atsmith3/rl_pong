@@ -26,7 +26,7 @@ class ReplayMemory:
     def push(self, *args):
         self.memory.append(Transition(*args))
 
-    def sample(sel, batch_size):
+    def sample(self, batch_size):
         return random.sample(self.memory, batch_size)
 
     def __len__(self):
@@ -80,7 +80,7 @@ class DQNPongAgent:
                 observation = env.get_context()
                 #observation, reward, terminated, truncated, _ = env.step(action.item())
                 reward = torch.tensor([reward], device=self.device)
-                #done = terminated or truncated
+                done = terminated
 
                 if terminated:
                     next_state = None
@@ -120,9 +120,9 @@ class DQNPongAgent:
         self.steps_done += 1
         if sample > eps_threshold:
             with torch.no_grad():
-                return self.policy(state).max(1).indeces.view(1, 1)
+                return self.policy(state).max(1).indices.view(1, 1)
         else:
-            return torch.tensor([[random.sample([0, 1, 2], 1)]],
+            return torch.tensor([random.sample([0, 1, 2], 1)],
                                 device=self.device,
                                 dtype=torch.long)
 
@@ -167,12 +167,12 @@ class DQNPongAgent:
         self.optimizer.zero_grad()
         loss.backward()
         # In-place gradient clipping
-        torch.nn.utils.clip_grad_value_(policy_net.parameters(), 100)
+        torch.nn.utils.clip_grad_value_(self.policy.parameters(), 100)
         self.optimizer.step()
 
     def eval(self, state) -> int:
         with torch.no_grad():
-            return self.policy(state).max(1).indeces.view(1, 1)
+            return self.policy(state).max(1).indices.view(1, 1)
 
 
 class DQN(nn.Module):

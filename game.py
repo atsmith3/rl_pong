@@ -75,8 +75,6 @@ class GameState:
         self.ball_y = ball_y_n
 
     def get_score(self) -> float:
-        if self.over:
-            self.score = -10
         return float(self.score)
 
     def get_context(self) -> List[float]:
