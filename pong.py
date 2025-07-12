@@ -8,6 +8,7 @@ import statistics
 from typing import List
 from game import GameState
 from agents.sl_agent import SLPongAgent
+from agents.dqn_agent import DQNPongAgent
 
 WHITE = sdl2.ext.Color(255, 255, 255)
 RED = sdl2.ext.Color(255, 0, 0)
@@ -73,8 +74,10 @@ def run(args):
     label = f"{args.batch_size}_{args.epochs}_{args.learning_rate}_{args.layers}_{args.dimension}"
     print(f"Beginning Training for {label}")
 
-    agent = SLPongAgent(args.layers, args.dimension)
-    agent.train(args.batch_size, args.epochs, args.learning_rate)
+    #agent = SLPongAgent(args.layers, args.dimension)
+    #agent.train(args.batch_size, args.epochs, args.learning_rate)
+    agent = DQNPongAgent(args.layers, args.dimension)
+    agent.train()
 
     running = True
     game = GameState()

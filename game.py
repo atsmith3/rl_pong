@@ -74,6 +74,11 @@ class GameState:
         self.ball_x = ball_x_n
         self.ball_y = ball_y_n
 
+    def get_score(self) -> float:
+        if self.over:
+            self.score = -10
+        return float(self.score)
+
     def get_context(self) -> List[float]:
         return [
             self.ball_x, self.ball_y, self.ball_vx, self.ball_vy, self.paddle_y
